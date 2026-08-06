@@ -115,6 +115,7 @@ textarea:focus{outline:none;border-color:#D84315}
 <option value="">-- Select your class --</option>
 <option value="3089" data-teacher="Angela">3089 - Mon/Wed 6:30 PM (Angela)</option>
 <option value="3095" data-teacher="Angela">3095 - Mon/Wed 8:30 PM (Angela)</option>
+<option value="3097" data-teacher="Jonelle Williams">3097 - Tue/Thu 11:00 AM (Jonelle)</option>
 <option value="3101" data-teacher="Angela">3101 - Tue/Thu 6:30 PM (Angela)</option>
 <option value="3104" data-teacher="Angela">3104 - Tue/Thu 8:30 PM (Angela)</option>
 </select>
@@ -723,7 +724,8 @@ function handleUserResponse(userText){
     
     addMessage('user',userText);
     transcript.push(scenario.userRole+': '+userText);
-    spokenText=transcript.filter(function(line){return line.indexOf(scenario.userRole+':')===0;}).join('\n');
+    spokenText=transcript.filter(function(line){return line.indexOf(scenario.userRole+':')===0;}).join('
+');
     
     currentExchange++;
     updateExchangeCounter();
@@ -807,7 +809,8 @@ function submitToTeacher(){
     if(btn){btn.disabled=true;btn.textContent='Submitting...';}
     var total=scores.l+scores.v+scores.s+scores.g;
     var pct=Math.round(total/37*100);
-    var transcriptText=transcript.length>0?transcript.join('\n'):'[No role play completed]';
+    var transcriptText=transcript.length>0?transcript.join('
+'):'[No role play completed]';
     var FORM_URL='https://docs.google.com/forms/d/e/1FAIpQLSe3-96EKbLIQ8Cm0oU6FFzvpTNqwBniK0mEHN5_nge5wr0UtA/formResponse';
 
     function buildFormData(){
@@ -882,7 +885,21 @@ function submitToTeacher(){
                     btn.style.background='#ef4444';
                     btn.onclick=function(){
                         var subject='B2 Class 15 Final Review - '+studentName;
-                        var body='Student: '+studentName+'\nClass: '+document.getElementById('className').value+'\nTeacher: '+document.getElementById('teacherName').value+'\nSession: 15\nReading: '+scores.l+'/3\nVocab: '+scores.v+'/6\nSpeaking: '+scores.s+'/20\nGrammar: '+scores.g+'/8\nPercentage: '+pct+'%\n\nWriting Response:\n'+(writingText||'')+'\n\nSpeaking Transcript:\n'+transcriptText;
+                        var body='Student: '+studentName+'
+Class: '+document.getElementById('className').value+'
+Teacher: '+document.getElementById('teacherName').value+'
+Session: 15
+Reading: '+scores.l+'/3
+Vocab: '+scores.v+'/6
+Speaking: '+scores.s+'/20
+Grammar: '+scores.g+'/8
+Percentage: '+pct+'%
+
+Writing Response:
+'+(writingText||'')+'
+
+Speaking Transcript:
+'+transcriptText;
                         window.location.href='mailto:patricia@sqaeducation.org?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
                     };
                 }
