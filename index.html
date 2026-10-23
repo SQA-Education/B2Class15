@@ -230,6 +230,15 @@ textarea:focus{outline:none;border-color:#D84315}
                 <button class="mic-btn" id="micBtn" onclick="toggleMic()" disabled>
                     <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                 </button>
+                <!-- Always-available typed fallback: if the microphone is blocked, fails, or captures nothing,
+                     the student can still answer by typing. -->
+                <div style="text-align:center;margin-top:4px">
+                    <button type="button" id="typeToggle" onclick="showType()" style="background:none;border:none;color:#D84315;font-size:14px;font-weight:600;cursor:pointer;text-decoration:underline">⌨️ Type my answer instead</button>
+                </div>
+                <div id="typeBox" style="display:none;margin-top:10px">
+                    <textarea id="typeInput" placeholder="Type your response here, then tap Send…" style="min-height:70px"></textarea>
+                    <button type="button" class="btn" onclick="sendTyped()" style="margin-top:8px">Send my answer →</button>
+                </div>
             </div>
 
             <div class="feedback hidden" id="sFeedback"></div>
@@ -636,10 +645,8 @@ function toggleMic(){
 function startRecording(){
     const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
     if(!SR){
-        const response=prompt('Speech recognition not available on this device/browser. Type your response:');
-        if(response){
-            handleUserResponse(response);
-        }
+        document.getElementById('statusText').textContent='Speech isn’t supported on this browser — type your answer below.';
+        showType();
         return;
     }
     
@@ -677,10 +684,11 @@ function startRecording(){
         errored=true;
         var st=document.getElementById('statusText');
         if(event.error==='not-allowed'||event.error==='permission-denied'){
-            if(st)st.textContent='Microphone blocked - allow access and try again.';
+            if(st)st.textContent='Microphone blocked — allow access, or type your answer below.';
             isRecording=false;
             document.getElementById('micBtn').classList.remove('recording');
             document.getElementById('micBtn').disabled=false;
+            showType();
         }else if(event.error==='no-speech'){
             if(st)st.textContent='No speech detected. Tap the microphone to try again.';
         }else if(event.error!=='aborted'){
@@ -735,6 +743,24 @@ function handleUserResponse(userText){
     setTimeout(()=>{
         playAIMessage();
     },1000);
+}
+
+function showType(){
+    var box=document.getElementById('typeBox'); if(box)box.style.display='block';
+    var t=document.getElementById('typeToggle'); if(t)t.style.display='none';
+    var inp=document.getElementById('typeInput'); if(inp)inp.focus();
+}
+function sendTyped(){
+    var el=document.getElementById('typeInput');
+    var text=(el&&el.value||'').trim();
+    if(!text){if(el)el.focus();return;}
+    if(isRecording&&recognition){try{recognition.stop();}catch(e){}}
+    isRecording=false;
+    document.getElementById('micBtn').classList.remove('recording');
+    el.value='';
+    document.getElementById('typeBox').style.display='none';
+    var t=document.getElementById('typeToggle'); if(t)t.style.display='inline-block';
+    handleUserResponse(text);
 }
 
 function endConversation(){
